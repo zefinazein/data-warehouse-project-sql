@@ -66,7 +66,7 @@ ON pr.cat_id = px.id
 WHERE prd_end_dt IS NULL; --Filter out all historical data
 GO
 ------------------------------------------
--- CREATE DIMENSION: gold.fact_sales
+-- CREATE FACTS: gold.fact_sales
 ------------------------------------------
 
 IF OBJECT_ID ('gold.fact_sales', 'V') IS NOT NULL
