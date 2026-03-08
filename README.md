@@ -65,10 +65,10 @@ data-warehouse-project-sql/
 |
 |—— LICENSE
 |—— README.md
+```
 
 # Author
 Zefina Zein
-```
 
 
 
