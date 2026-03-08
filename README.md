@@ -43,7 +43,32 @@ Type: Star
 <img width="640" height="397" alt="Data Flow Diagram drawio" src="https://github.com/user-attachments/assets/7007b66f-6f36-42e8-b0a7-79857916f0c2" />
 
 # 📂 Project Structure 📂
+```
+data-warehouse-project-sql/
+|
+|—— datasets/
+|   |—— source_crm/
+|   |—— source_erp/
+|
+|—— docs/
+|   |—— data_architecture.png
+|   |—— data_flow_diagram.png
+|   |—— integration_model.png
+|
+|—— scripts/
+|   |—— bronze/
+|   |—— silver/
+|   |—— gold/
+|   |—— init_database.sql
+|
+|—— tests/
+|
+|—— LICENSE
+|—— README.md
 
+# Author
+Zefina Zein
+```
 
 
 
