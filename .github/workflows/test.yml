@@ -1,0 +1,62 @@
+name: Data Warehouse Quality Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-pipeline:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          SA_PASSWORD: "CiTestPassword123!"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd="/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P CiTestPassword123! -C -Q 'SELECT 1' || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install sqlcmd
+        run: |
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+
+      - name: Create database and schemas
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -i scripts/init_database.sql
+
+      - name: Deploy stored procedures (bronze & silver)
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/bronze/load_bronze.sql
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/silver/load_silver.sql
+
+      - name: Run load_bronze
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -Q "EXEC bronze.load_bronze @source_path = '$(pwd)/datasets';"
+
+      - name: Run load_silver
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -Q "EXEC silver.load_silver;"
+
+      - name: Deploy gold views
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/gold/ddl_gold.sql
+
+      - name: Run quality checks
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i tests/quality_checks.sql -b
