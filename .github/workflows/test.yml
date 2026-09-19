@@ -30,11 +30,11 @@ jobs:
 
       - name: Install sqlcmd
         run: |
-          curl https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --batch --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+          curl -sSL https://github.com/microsoft/go-sqlcmd/releases/download/v1.10.0/sqlcmd-linux-amd64.tar.bz2 -o sqlcmd.tar.bz2
+          tar -xjf sqlcmd.tar.bz2
+          chmod +x ./sqlcmd
+          sudo mv ./sqlcmd /usr/local/bin/sqlcmd
+          echo "/usr/local/bin" >> $GITHUB_PATH
 
       - name: Create database and schemas
         run: |
