@@ -1,23 +1,29 @@
 /*
 =======================================================================
-STORED PROCEDURE: Load Data to Bronze Layer from Source
+Stored Procedure: Load Bronze Layer (Source -> Bronze)
+=======================================================================
 
-Note:
-	This script performs:
-	- Load data into 'bronze' schema from external CSV files.
+This stored procedure loads data into the 'bronze' schema. 
+It performs the following actions:
 	- Truncates the bronze tables before loading data.
-	- Uses the 'BULK INSERT" command to load data from CSV files tables.
+    - Uses the `BULK INSERT` command to load data to bronze tables.
+	- Accepts @source_path as a parameter, defaulting to local Windows
+ 	  path, so local usage is unaffected.
+	- CI calls this with a Linux path for example:
+      EXEC bronze.load_bronze @source_path = '/var/opt/mssql/datasets';
 
-	Parameters: None
-
-	Usage example: EXEC bronze.load_bronze
+Usage (local):  EXEC bronze.load_bronze;
+Usage (CI):     EXEC bronze.load_bronze @source_path = '/var/opt/mssql/datasets';
 ========================================================================
 */
 
-
-CREATE OR ALTER PROCEDURE bronze.load_bronze AS
+CREATE OR ALTER PROCEDURE bronze.load_bronze
+    @source_path NVARCHAR(500) = 'C:\sql\DA-course\sql-data-warehouse-project\datasets'
+AS
 BEGIN
 	DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME;
+	DECLARE @sql NVARCHAR(MAX);
+
 	BEGIN TRY
 		SET @batch_start_time = GETDATE();
 		PRINT '========================================';
@@ -27,102 +33,48 @@ BEGIN
 		PRINT '----------LOADING CRM TABLES------------';
 
 		SET @start_time = GETDATE();
-		PRINT '>>>TRUNCATING Table: bronze.crm_cust_info';
 		TRUNCATE TABLE bronze.crm_cust_info;
-
-		PRINT '>>INSERTING DATA INTO Table: bronze.crm_cust_info';
-		BULK INSERT bronze.crm_cust_info
-		FROM 'C:\sql\DA-course\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SET @sql = N'BULK INSERT bronze.crm_cust_info FROM ''' + @source_path + N'/source_crm/cust_info.csv'' WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', TABLOCK);';
+		EXEC sp_executesql @sql;
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
-		PRINT '-------------';
+		PRINT '>> crm_cust_info loaded in ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 
 		SET @start_time = GETDATE();
-		PRINT '>>>TRUNCATING Table: bronze.crm_prd_info';
 		TRUNCATE TABLE bronze.crm_prd_info;
-
-		PRINT '>>INSERTING DATA INTO Table: bronze.crm_prd_info';
-		BULK INSERT bronze.crm_prd_info
-		FROM 'C:\sql\DA-course\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SET @sql = N'BULK INSERT bronze.crm_prd_info FROM ''' + @source_path + N'/source_crm/prd_info.csv'' WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', TABLOCK);';
+		EXEC sp_executesql @sql;
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
-		PRINT '-------------';
+		PRINT '>> crm_prd_info loaded in ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 
 		SET @start_time = GETDATE();
-		PRINT '>>>TRUNCATING Table: bronze.crm_sales_details';
 		TRUNCATE TABLE bronze.crm_sales_details;
-
-		PRINT '>>INSERTING DATA INTO Table: bronze.crm_sales_details';
-		BULK INSERT bronze.crm_sales_details
-		FROM 'C:\sql\DA-course\sql-data-warehouse-project\datasets\source_crm\sales_details.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SET @sql = N'BULK INSERT bronze.crm_sales_details FROM ''' + @source_path + N'/source_crm/sales_details.csv'' WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', TABLOCK);';
+		EXEC sp_executesql @sql;
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
-		PRINT '-------------';
+		PRINT '>> crm_sales_details loaded in ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 
 		PRINT '----------LOADING ERP TABLES------------';
 
 		SET @start_time = GETDATE();
-		PRINT '>>>TRUNCATING Table: bronze.erp_cust_az12';
 		TRUNCATE TABLE bronze.erp_cust_az12;
-
-		PRINT '>>INSERTING DATA INTO Table: bronze.erp_cust_az12';
-		BULK INSERT bronze.erp_cust_az12
-		FROM 'C:\sql\DA-course\sql-data-warehouse-project\datasets\source_erp\cust_az12.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SET @sql = N'BULK INSERT bronze.erp_cust_az12 FROM ''' + @source_path + N'/source_erp/cust_az12.csv'' WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', TABLOCK);';
+		EXEC sp_executesql @sql;
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
-		PRINT '-------------';
+		PRINT '>> erp_cust_az12 loaded in ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 
 		SET @start_time = GETDATE();
-		PRINT '>>>TRUNCATING Table: bronze.erp_loc_a101';
 		TRUNCATE TABLE bronze.erp_loc_a101;
-
-		PRINT '>>INSERTING DATA INTO Table: bronze.erp_loc_a101';
-		BULK INSERT bronze.erp_loc_a101
-		FROM 'C:\sql\DA-course\sql-data-warehouse-project\datasets\source_erp\loc_a101.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SET @sql = N'BULK INSERT bronze.erp_loc_a101 FROM ''' + @source_path + N'/source_erp/loc_a101.csv'' WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', TABLOCK);';
+		EXEC sp_executesql @sql;
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
-		PRINT '-------------';
+		PRINT '>> erp_loc_a101 loaded in ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 
 		SET @start_time = GETDATE();
-		PRINT '>>>TRUNCATING Table: bronze.erp_px_cat_g1v2';
 		TRUNCATE TABLE bronze.erp_px_cat_g1v2;
-
-		PRINT '>>>TRUNCATING Table: bronze.erp_px_cat_g1v2';
-		BULK INSERT bronze.erp_px_cat_g1v2
-		FROM 'C:\sql\DA-course\sql-data-warehouse-project\datasets\source_erp\px_cat_g1v2.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SET @sql = N'BULK INSERT bronze.erp_px_cat_g1v2 FROM ''' + @source_path + N'/source_erp/px_cat_g1v2.csv'' WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', TABLOCK);';
+		EXEC sp_executesql @sql;
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
-		PRINT '-------------';
+		PRINT '>> erp_px_cat_g1v2 loaded in ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 
 		SET @batch_end_time = GETDATE();
 		PRINT '=================================';
@@ -131,11 +83,10 @@ BEGIN
 		PRINT '=================================';
 	END TRY
 	BEGIN CATCH
-		PRINT '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!';
-		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER';
-		PRINT 'ERROR Message' + ERROR_MESSAGE();
-		PRINT 'ERROR Number' + CAST(ERROR_NUMBER() AS NVARCHAR);
-		PRINT 'ERROR State' + CAST(ERROR_STATE() AS NVARCHAR);
-		PRINT '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!';
+		PRINT 'ERROR OCCURRED DURING LOADING BRONZE LAYER';
+		PRINT 'ERROR Message: ' + ERROR_MESSAGE();
+		PRINT 'ERROR Number: ' + CAST(ERROR_NUMBER() AS NVARCHAR);
+		PRINT 'ERROR State: ' + CAST(ERROR_STATE() AS NVARCHAR);
+		THROW;
 	END CATCH
 END
