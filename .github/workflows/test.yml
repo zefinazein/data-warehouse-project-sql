@@ -40,14 +40,18 @@ jobs:
         run: |
           sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -i scripts/init_database.sql -b
 
-      - name: Verify database exists (debug)
+      - name: Deploy DDL (create bronze tables)
         run: |
-          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -Q "SELECT name FROM sys.databases;"
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/bronze/ddl_bronze.sql -b
+
+      - name: Deploy DDL (create silver tables)
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/silver/ddl_silver.sql -b
 
       - name: Deploy stored procedures (bronze & silver)
         run: |
-          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/bronze/load_bronze.sql
-          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/silver/load_silver.sql
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/bronze/proc_load_bronze.sql -b
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/silver/proc_load_silver.sql -b
 
       - name: Run load_bronze
         run: |
@@ -59,7 +63,7 @@ jobs:
 
       - name: Deploy gold views
         run: |
-          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/gold/ddl_gold.sql
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -d DataWarehouse -i scripts/gold/ddl_gold.sql -b
 
       - name: Run quality checks
         run: |
