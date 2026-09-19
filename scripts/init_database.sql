@@ -27,7 +27,9 @@ GO
 -- CREATE DWH DATABASE
 CREATE DATABASE DataWarehouse;
 GO
+	
 USE DataWarehouse;
+GO
 
 -- CREATE SCHEMAS
 CREATE SCHEMA bronze;
