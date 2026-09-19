@@ -26,7 +26,7 @@ GO
 
 -- CREATE DWH DATABASE
 CREATE DATABASE DataWarehouse;
-
+GO
 USE DataWarehouse;
 
 -- CREATE SCHEMAS
