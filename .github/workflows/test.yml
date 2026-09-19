@@ -38,7 +38,11 @@ jobs:
 
       - name: Create database and schemas
         run: |
-          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -i scripts/init_database.sql
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -i scripts/init_database.sql -b
+
+      - name: Verify database exists (debug)
+        run: |
+          sqlcmd -S localhost -U sa -P "CiTestPassword123!" -C -Q "SELECT name FROM sys.databases;"
 
       - name: Deploy stored procedures (bronze & silver)
         run: |
