@@ -1,4 +1,4 @@
-# Data Warehouse SQL Project
+# CRM-ERP Data Warehouse & Orchestration Pipeline
 
 Designing, orchestrating, and testing a data warehouse for a bicycle retailer, from raw CRM/ERP data to a business-ready analytics layer.
 
