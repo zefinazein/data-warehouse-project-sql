@@ -54,7 +54,8 @@ Type: Star
 
 # ❯❯❯❯ Data Flow ❯❯❯❯
 
-<img width="640" height="397" alt="Data Flow Diagram drawio" src="https://github.com/user-attachments/assets/7007b66f-6f36-42e8-b0a7-79857916f0c2" />
+<img width="793" height="456" alt="image" src="https://github.com/user-attachments/assets/1a697631-dd84-40e8-a790-87c7f3038a43" />
+
 
 
 # ⛯ Orchestration ⛯
